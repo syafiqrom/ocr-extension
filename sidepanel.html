@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 12px;
+            font-size: 14px;
+        }
+
+        h3 {
+            margin: 16px 0 4px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        #status {
+            padding: 8px;
+            background: #eef3f8;
+            border-radius: 4px;
+        }
+
+        .fail {
+            color: #b00020;
+        }
+
+        input {
+            width: 70%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="setup">
+        <p>Enter your secret code:</p>
+        <input id="codeInput" type="password">
+        <button id="saveBtn">Save</button>
+    </div>
+
+    <div id="main" hidden>
+        <div id="status">Starting…</div>
+        <h3>Pending (<span id="pCount">0</span>)</h3>
+        <ul id="pList"></ul>
+        <h3>Done (<span id="dCount">0</span>)</h3>
+        <ul id="dList"></ul>
+        <h3>Failed (<span id="fCount">0</span>)</h3>
+        <ul id="fList"></ul>
+        <p>
+            <button id="clearBtn">Clear all</button>
+            <button id="changeBtn">Change secret code</button>
+        </p>
+    </div>
+
+    <script src="settings.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+
+</html>

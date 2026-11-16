@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "DO Scanner Filler",
+    "version": "1.0",
+    "permissions": [
+        "sidePanel",
+        "storage"
+    ],
+    "host_permissions": [
+        "file:///*",
+        "https://ocr-star-b3312-default-rtdb.asia-southeast1.firebasedatabase.app/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "action": {
+        "default_title": "DO Scanner"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "file:///*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}

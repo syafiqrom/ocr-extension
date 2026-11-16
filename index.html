@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Docket Grid</title>
+    <style>
+        :root {
+            --head: #1f3a52;
+            --head-text: #fff;
+            --row-alt: #f2f2f2;
+            --row: #fff;
+            --sel: #e3e3e3;
+            --border: #d4d4d4;
+            --text: #333;
+            --muted: #888;
+            --accent: #2a6fa8;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Segoe UI", Roboto, Arial, sans-serif;
+            background: #eaeaea;
+            color: var(--text)
+        }
+
+        .wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border: 1px solid var(--border);
+            overflow-x: auto
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 640px;
+            font-size: 14px
+        }
+
+        thead th {
+            background: var(--head);
+            color: var(--head-text);
+            font-weight: 600;
+            padding: 14px 12px;
+            text-align: center;
+            border-right: 1px solid #3d566d
+        }
+
+        thead th:last-child {
+            border-right: 0
+        }
+
+        .filter td {
+            background: #fff;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border)
+        }
+
+        .filter td:last-child {
+            border-right: 0
+        }
+
+        .search {
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .search svg {
+            flex: none;
+            width: 14px;
+            height: 14px;
+            stroke: #555;
+            fill: none;
+            stroke-width: 2
+        }
+
+        .search input {
+            width: 100%;
+            border: 0;
+            outline: 0;
+            font: inherit;
+            padding: 6px 4px;
+            background: transparent;
+            text-align: center
+        }
+
+        .search input:focus {
+            box-shadow: 0 1px 0 var(--accent)
+        }
+
+        tbody td {
+            padding: 16px 12px;
+            text-align: center;
+            border-right: 1px solid var(--border);
+            white-space: nowrap
+        }
+
+        tbody td:last-child {
+            border-right: 0;
+            text-align: left
+        }
+
+        tbody tr:nth-child(odd) {
+            background: var(--row-alt)
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--row)
+        }
+
+        tbody tr.selected {
+            background: var(--sel)
+        }
+
+        tbody tr:hover {
+            background: #dde8f1
+        }
+
+        .chk {
+            width: 48px
+        }
+
+        input[type=checkbox] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--head);
+            cursor: pointer
+        }
+
+        .empty {
+            padding: 32px;
+            text-align: center;
+            color: var(--muted)
+        }
+
+        .count {
+            max-width: 900px;
+            margin: 8px auto 0;
+            font-size: 13px;
+            color: var(--muted)
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th class="chk"><input type="checkbox" id="selectAll" aria-label="Select all visible rows"></th>
+                    <th>Docket</th>
+                    <th>Customer DO</th>
+                    <th>Customer Name</th>
+                </tr>
+                <tr class="filter">
+                    <td class="chk"></td>
+                    <td><label class="search"><svg viewBox="0 0 24 24">
+                                <circle cx="10" cy="10" r="6" />
+                                <path d="M15 15l6 6" />
+                            </svg><input data-col="docket" placeholder="Filter docket"
+                                aria-label="Filter docket"></label></td>
+                    <td><label class="search"><svg viewBox="0 0 24 24">
+                                <circle cx="10" cy="10" r="6" />
+                                <path d="M15 15l6 6" />
+                            </svg><input data-col="doNo" placeholder="Filter DO"
+                                aria-label="Filter customer DO"></label></td>
+                    <td><label class="search"><svg viewBox="0 0 24 24">
+                                <circle cx="10" cy="10" r="6" />
+                                <path d="M15 15l6 6" />
+                            </svg><input data-col="name" placeholder="Filter name"
+                                aria-label="Filter customer name"></label></td>
+                </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+    </div>
+    <div class="count" id="count"></div>
+
+    <script>
+        const data = [
+            { docket: "SDN00145400", doNo: "802108845", name: "DAIKIN MALAYSIA SALES & SERVICE SDN BHD" },
+            { docket: "SDN00145401", doNo: "802141917", name: "PANASONIC MANUFACTURING MALAYSIA BHD" },
+            { docket: "SDN00145402", doNo: "802141782", name: "SAMSUNG ELECTRONICS (M) SDN BHD" },
+            { docket: "SDN00145403", doNo: "802108852", name: "TOSHIBA TEC MALAYSIA SDN BHD" },
+            { docket: "SDN00145404", doNo: "802108860", name: "DAIKIN AIR-CONDITIONING (M) SDN BHD" },
+            { docket: "SDN00145405", doNo: "802108873", name: "SHARP ELECTRONICS MALAYSIA SDN BHD" },
+            { docket: "SDN00145406", doNo: "802108874", name: "LG ELECTRONICS MALAYSIA SDN BHD" },
+            { docket: "SDN00145407", doNo: "802108881", name: "MITSUBISHI ELECTRIC SALES MALAYSIA" },
+            { docket: "SDN00145408", doNo: "802108890", name: "HITACHI ASIA (MALAYSIA) SDN BHD" },
+            { docket: "SDN00145409", doNo: "802108895", name: "SONY EMCS (MALAYSIA) SDN BHD" }
+        ];
+
+        const tbody = document.getElementById("rows");
+        const countEl = document.getElementById("count");
+        const selectAll = document.getElementById("selectAll");
+        const inputs = [...document.querySelectorAll(".filter input")];
+        const selected = new Set();
+
+        function visibleRows() {
+            const f = {};
+            inputs.forEach(i => f[i.dataset.col] = i.value.trim().toLowerCase());
+            return data.filter(r => Object.keys(f).every(k => r[k].toLowerCase().includes(f[k])));
+        }
+
+        function updateMeta(rows) {
+            const n = rows.filter(r => selected.has(r.docket)).length;
+            selectAll.checked = rows.length > 0 && n === rows.length;
+            selectAll.indeterminate = n > 0 && n < rows.length;
+            countEl.textContent = rows.length + " of " + data.length + " rows shown, " + selected.size + " selected";
+        }
+
+        function render() {
+            const rows = visibleRows();
+            tbody.innerHTML = "";
+            if (!rows.length) {
+                tbody.innerHTML = '<tr><td class="empty" colspan="4">No dockets match these filters.</td></tr>';
+            }
+            rows.forEach(r => {
+                const tr = document.createElement("tr");
+                if (selected.has(r.docket)) tr.classList.add("selected");
+                tr.innerHTML = '<td class="chk"><input type="checkbox" ' + (selected.has(r.docket) ? "checked" : "") + ' aria-label="Select ' + r.docket + '"></td>' +
+                    '<td>' + r.docket + '</td><td>' + r.doNo + '</td><td>' + r.name + '</td>';
+                tr.querySelector("input").addEventListener("change", e => {
+                    e.target.checked ? selected.add(r.docket) : selected.delete(r.docket);
+                    tr.classList.toggle("selected", e.target.checked);
+                    updateMeta(rows);
+                });
+                tbody.appendChild(tr);
+            });
+            updateMeta(rows);
+        }
+
+        selectAll.addEventListener("change", () => {
+            const on = selectAll.checked;
+            visibleRows().forEach(r => on ? selected.add(r.docket) : selected.delete(r.docket));
+            render();
+        });
+        inputs.forEach(i => i.addEventListener("input", render));
+        render();
+    </script>
+</body>
+
+</html>
