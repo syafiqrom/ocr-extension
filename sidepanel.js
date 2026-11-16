@@ -38,6 +38,10 @@ $("saveBtn").onclick = async () => {
     start(c);
 };
 
+$("codeInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") $("saveBtn").click();
+});
+
 $("changeBtn").onclick = async () => {
     if (es) es.close();
     await chrome.storage.local.remove("code");
