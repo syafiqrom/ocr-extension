@@ -68,8 +68,12 @@ async function fill(number) {
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+    if (msg.type === "ping") {
+        sendResponse({ ok: true });
+        return;
+    }
     if (msg.type === "fill") {
         fill(msg.number).then(sendResponse);
-        return true; // keep the channel open for the async reply
+        return true;
     }
 });

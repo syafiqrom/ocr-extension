@@ -2,6 +2,7 @@ let code = null;
 let es = null;
 let running = false;
 let pending = {}, done = {}, failed = {};
+let lastReady = null;
 
 const $ = id => document.getElementById(id);
 const setStatus = t => ($("status").textContent = t);
@@ -26,9 +27,11 @@ async function init() {
 
 function start(c) {
     code = c;
+    lastReady = null;      // force a fresh write
     $("setup").hidden = true;
     $("main").hidden = false;
     connect();
+    updateStatus();
 }
 
 $("saveBtn").onclick = async () => {
@@ -44,8 +47,10 @@ $("codeInput").addEventListener("keydown", e => {
 
 $("changeBtn").onclick = async () => {
     if (es) es.close();
+    await api("status", "PUT", { ready: false }).catch(() => { });
     await chrome.storage.local.remove("code");
     code = null;
+    lastReady = null;
     $("setup").hidden = false;
     $("main").hidden = true;
 };
@@ -165,5 +170,43 @@ async function processQueue() {
         running = false;
     }
 }
+
+// ---- Check if DO page is ready ----
+async function updateStatus() {
+    if (!code) return;
+    let ready = false;
+    try {
+        const tab = await findTab();
+        if (tab) {
+            const r = await chrome.tabs.sendMessage(tab.id, { type: "ping" });
+            ready = !!(r && r.ok);
+        }
+    } catch (e) { /* page not reachable */ }
+
+    if (ready === lastReady) return;   // only write when it changes
+    lastReady = ready;
+    try {
+        await api("status", "PUT", { ready });
+    } catch (e) {
+        lastReady = null;              // retry next time
+    }
+}
+
+// Page opened, reloaded, navigated away, or closed
+chrome.tabs.onUpdated.addListener((_id, info) => {
+    if (info.status === "complete" || info.url) setTimeout(updateStatus, 500);
+});
+chrome.tabs.onRemoved.addListener(() => setTimeout(updateStatus, 200));
+chrome.tabs.onActivated.addListener(updateStatus);
+
+// Side panel closing: best-effort write of false
+window.addEventListener("pagehide", () => {
+    if (!code) return;
+    fetch(`${DB_URL}/lists/${code}/status.json`, {
+        method: "PUT",
+        body: JSON.stringify({ ready: false }),
+        keepalive: true                // lets the request finish while the page closes
+    });
+});
 
 init();
